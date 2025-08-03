@@ -1,0 +1,49 @@
+-- 사용자 테이블 생성
+CREATE TABLE user (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 심볼 테이블 생성
+CREATE TABLE symbol (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    symbol VARCHAR(50) NOT NULL UNIQUE,
+    base_coin VARCHAR(10) NOT NULL,
+    quote_coin VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 주문 테이블 생성
+CREATE TABLE `order` (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    symbol_id BIGINT NOT NULL,
+    order_type ENUM('LIMIT', 'MARKET') NOT NULL,
+    order_state ENUM('BUY', 'SELL') NOT NULL,
+    price DECIMAL(18,8),
+    quantity DECIMAL(18,8) NOT NULL,
+    executed_quantity DECIMAL(18,8) DEFAULT 0,
+    status ENUM('PENDING', 'PARTIAL_FILLED', 'FILLED', 'CANCELLED') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (symbol_id) REFERENCES symbol(id)
+);
+
+-- 거래 테이블 생성
+CREATE TABLE trade (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    buy_order_id BIGINT NOT NULL,
+    sell_order_id BIGINT NOT NULL,
+    symbol_id BIGINT NOT NULL,
+    price DECIMAL(18,8) NOT NULL,
+    quantity DECIMAL(18,8) NOT NULL,
+    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (buy_order_id) REFERENCES `order`(id),
+    FOREIGN KEY (sell_order_id) REFERENCES `order`(id),
+    FOREIGN KEY (symbol_id) REFERENCES symbol(id)
+);
