@@ -2,7 +2,7 @@
 CREATE TABLE user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -23,10 +23,10 @@ CREATE TABLE `order` (
     user_id BIGINT NOT NULL,
     symbol_id BIGINT NOT NULL,
     order_type ENUM('LIMIT', 'MARKET') NOT NULL,
-    side ENUM('BUY', 'SELL') NOT NULL,
+    order_state ENUM('BUY', 'SELL') NOT NULL,
     price DECIMAL(18,8),
     quantity DECIMAL(18,8) NOT NULL,
-    filled_quantity DECIMAL(18,8) DEFAULT 0,
+    executed_quantity DECIMAL(18,8) DEFAULT 0,
     status ENUM('PENDING', 'PARTIAL_FILLED', 'FILLED', 'CANCELLED') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -39,11 +39,11 @@ CREATE TABLE trade (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     buy_order_id BIGINT NOT NULL,
     sell_order_id BIGINT NOT NULL,
-    market_id BIGINT NOT NULL,
+    symbol_id BIGINT NOT NULL,
     price DECIMAL(18,8) NOT NULL,
     quantity DECIMAL(18,8) NOT NULL,
     executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (buy_order_id) REFERENCES `order`(id),
     FOREIGN KEY (sell_order_id) REFERENCES `order`(id),
-    FOREIGN KEY (market_id) REFERENCES symbol(id)
+    FOREIGN KEY (symbol_id) REFERENCES symbol(id)
 );
