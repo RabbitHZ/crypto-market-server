@@ -41,7 +41,14 @@ public class OrderController {
             @Parameter(description = "주문 요청 객체") @Valid @RequestBody final OrderRequestV1 request) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
-        // 유효성 검사 예시: if (request.getQuantity() <= 0) throw new IllegalArgumentException("음수 수량");
+        if (userId == null) {
+            throw new SecurityException("인증되지 않은 사용자입니다.");
+        }
+        // 유효성 검사
+        if (request.quantity() <= 0) {
+            throw new IllegalArgumentException("음수 수량 또는 0은 허용되지 않습니다.");
+        }
+
         OrderResponseV1 response = new OrderResponseV1(1L, OrderState.BUY, OrderStatus.PENDING, 0, userId);
         return ResponseEntity.ok(response);
     }
@@ -58,6 +65,9 @@ public class OrderController {
             @Parameter(description = "조회 요청 객체") @Valid @RequestBody final OrderQueryRequestV1 request) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
+        if (userId == null) {
+            throw new SecurityException("인증되지 않은 사용자입니다.");
+        }
 
         // 필터링 예시: 날짜 범위 검사 (현재일 -5년 ~ 현재)
         OrderHistoryV1 order = new OrderHistoryV1(
@@ -79,8 +89,14 @@ public class OrderController {
             @Parameter(description = "주문 수정 요청 객체") @Valid @RequestBody final OrderRequestV1 request) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
+        if (userId == null) {
+            throw new SecurityException("인증되지 않은 사용자입니다.");
+        }
+        // 유효성 검사
+        if (request.quantity() <= 0) {
+            throw new IllegalArgumentException("음수 수량 또는 0은 허용되지 않습니다.");
+        }
 
-        // 유효성 검사 예시: if (request.quantity() <= 0) throw new IllegalArgumentException("음수 수량");
         OrderResponseV1 response = new OrderResponseV1(orderId, request.orderState(), OrderStatus.PENDING,0, userId);
         return ResponseEntity.ok(response);
     }
@@ -97,8 +113,10 @@ public class OrderController {
             @Parameter(description = "주문 ID") @PathVariable Long orderId) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
+        if (userId == null) {
+            throw new SecurityException("인증되지 않은 사용자입니다.");
+        }
 
-        // 상태 확인 예시: if (not cancellable) throw new IllegalStateException();
         return ResponseEntity.ok("주문 취소 완료");
     }
 }
