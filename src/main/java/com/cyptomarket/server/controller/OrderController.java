@@ -1,14 +1,18 @@
 package com.cyptomarket.server.controller;
 
-import com.cyptomarket.server.dto.OrderHistoryDto;
-import com.cyptomarket.server.dto.OrderQueryRequestDto;
-import com.cyptomarket.server.dto.OrderRequestDto;
-import com.cyptomarket.server.dto.OrderResponseDto;
+import com.cyptomarket.server.dto.OrderHistoryV1;
+import com.cyptomarket.server.dto.OrderQueryRequestV1;
+import com.cyptomarket.server.dto.OrderRequestV1;
+import com.cyptomarket.server.dto.OrderResponseV1;
+import com.cyptomarket.server.entity.enums.OrderState;
+import com.cyptomarket.server.entity.enums.OrderStatus;
+import com.cyptomarket.server.entity.enums.OrderType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 @Tag(name = "주문 API", description = "코인 매매 및 주문 조회 API")
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/v1/api/orders")
 public class OrderController {
 
     // userId를 추출하는 유틸리티 메서드
@@ -33,12 +37,12 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @PostMapping
-    public ResponseEntity<OrderResponseDto> createOrder(
-            @Parameter(description = "주문 요청 객체") @RequestBody OrderRequestDto request) {
+    public ResponseEntity<OrderResponseV1> createOrder(
+            @Parameter(description = "주문 요청 객체") @Valid @RequestBody final OrderRequestV1 request) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
         // 유효성 검사 예시: if (request.getQuantity() <= 0) throw new IllegalArgumentException("음수 수량");
-        OrderResponseDto response = new OrderResponseDto(1L, "PENDING", "BUY", 0, userId);
+        OrderResponseV1 response = new OrderResponseV1(1L, OrderState.BUY, OrderStatus.PENDING, 0, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -50,14 +54,14 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping
-    public ResponseEntity<List<OrderHistoryDto>> getOrderHistory(
-            @Parameter(description = "조회 요청 객체") @RequestBody OrderQueryRequestDto request) {
+    public ResponseEntity<List<OrderHistoryV1>> getOrderHistory(
+            @Parameter(description = "조회 요청 객체") @Valid @RequestBody final OrderQueryRequestV1 request) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
 
         // 필터링 예시: 날짜 범위 검사 (현재일 -5년 ~ 현재)
-        OrderHistoryDto order = new OrderHistoryDto(
-                1L, "BTC/KRW", "LIMIT", "BUY", 50000000, 0.1, 0.05, "PARTIAL_FILLED", "2025-08-03", userId);
+        OrderHistoryV1 order = new OrderHistoryV1(
+                1L, "BTC/KRW", OrderType.LIMIT, OrderState.BUY, 50000000, 0.1, 0.05, OrderStatus.PARTIAL_FILLED, "2025-08-03", userId);
         return ResponseEntity.ok(Arrays.asList(order));
     }
 
@@ -70,14 +74,14 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @PutMapping("/{orderId}")
-    public ResponseEntity<OrderResponseDto> updateOrder(
+    public ResponseEntity<OrderResponseV1> updateOrder(
             @Parameter(description = "주문 ID") @PathVariable Long orderId,
-            @Parameter(description = "주문 수정 요청 객체") @RequestBody OrderRequestDto request) {
+            @Parameter(description = "주문 수정 요청 객체") @Valid @RequestBody final OrderRequestV1 request) {
         // 인증된 사용자의 userId 추출
         Long userId = getAuthenticatedUserId();
 
         // 유효성 검사 예시: if (request.quantity() <= 0) throw new IllegalArgumentException("음수 수량");
-        OrderResponseDto response = new OrderResponseDto(orderId, request.orderState(), "PENDING",0, userId);
+        OrderResponseV1 response = new OrderResponseV1(orderId, request.orderState(), OrderStatus.PENDING,0, userId);
         return ResponseEntity.ok(response);
     }
 
