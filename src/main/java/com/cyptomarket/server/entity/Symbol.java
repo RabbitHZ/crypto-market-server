@@ -1,10 +1,14 @@
 package com.cyptomarket.server.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
+@Getter
+@NoArgsConstructor
 @Table(name = "symbol")
 public class Symbol {
 
@@ -23,4 +27,8 @@ public class Symbol {
 
     @OneToMany(mappedBy = "symbol")
     private List<Order> orders;
+
+    public Symbol(String symbol) {
+        this.symbol = symbol;
+    }
 }
