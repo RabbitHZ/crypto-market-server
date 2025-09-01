@@ -31,4 +31,10 @@ public class Symbol {
     public Symbol(String symbol) {
         this.symbol = symbol;
     }
+
+    public Symbol(String s, String bitcoin, String krw) {
+        this.symbol = s;
+        this.baseCoin = bitcoin;
+        this.quoteCoin = krw;
+    }
 }
