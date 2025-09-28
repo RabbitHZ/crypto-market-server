@@ -13,9 +13,11 @@ import com.cyptomarket.server.repository.SymbolRepository;
 import com.cyptomarket.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -171,6 +173,29 @@ public class OrderService {
 
         // 변경된 주문 저장
         orderRepository.save(order);
+    }
+
+    @Transactional
+    public void updateOrderStatuses() {
+        List<Order> orders = orderRepository.findPendingOrPartialOrders();
+        for (Order order : orders) {
+            BigDecimal executed = BigDecimal.valueOf(order.getExecutedQuantity());
+            BigDecimal quantity = BigDecimal.valueOf(order.getQuantity());
+
+            OrderStatus newStatus;
+            if (executed.compareTo(BigDecimal.ZERO) == 0) {
+                newStatus = OrderStatus.PENDING;
+            } else if (executed.compareTo(quantity) < 0) {
+                newStatus = OrderStatus.PARTIAL_FILLED;
+            } else {
+                newStatus = OrderStatus.FILLED;
+            }
+
+            if (newStatus != order.getStatus()) {
+                order.updateStatus(newStatus);
+                orderRepository.save(order);
+            }
+        }
     }
 
     private void validateAmount(OrderRequestV1 request) {

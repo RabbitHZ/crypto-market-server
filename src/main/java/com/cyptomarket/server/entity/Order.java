@@ -88,4 +88,8 @@ public class Order extends BaseEntity {
                 .status(orderStatus)
                 .build();
     }
+
+    public void updateStatus(OrderStatus newStatus) {
+        this.status = newStatus;
+    }
 }
