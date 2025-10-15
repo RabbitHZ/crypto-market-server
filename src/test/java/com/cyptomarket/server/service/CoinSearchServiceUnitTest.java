@@ -63,7 +63,7 @@ public class CoinSearchServiceUnitTest {
         CoinSearchRequestV1 requestV1 = new CoinSearchRequestV1("ㅂ", "KRW");
         when(symbolRepository.searchByChosungAndCategory("ㅂ", "KRW"))
                 .thenReturn(mockSymbols.stream()
-                        .filter(s -> s.getBaseCoin().startsWith("Bitcoin") && s.getClass().equals("KRW"))
+                        .filter(s -> s.getBaseCoin().startsWith("Bitcoin") && s.getQuoteCoin().equals("KRW"))
                         .toList());
 
         //When
@@ -71,7 +71,10 @@ public class CoinSearchServiceUnitTest {
 
         //Then
         assertNotNull(result);
-        assertEquals(0, result.size());
+        assertEquals(1, result.size());
+        assertEquals("Bitcoin", result.get(0).name());
+        assertEquals("BTC/KRW", result.get(0).symbol());
+        assertEquals("KRW", result.get(0).category());
     }
 
     @Test
@@ -80,6 +83,70 @@ public class CoinSearchServiceUnitTest {
         //Given
         CoinSearchRequestV1 request = new CoinSearchRequestV1("XRP", "BTC");
         when(symbolRepository.searchByKeywordAndCategory("XRP", "BTC"))
+                .thenReturn(Collections.emptyList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return empty list when keyword is null")
+    void shouldReturnEmptyListWhenKeywordIsNull() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1(null, "KRW");
+        when(symbolRepository.searchByKeywordAndCategory(null, "KRW"))
+                .thenReturn(Collections.emptyList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return empty list when keyword is empty string")
+    void shouldReturnEmptyListWhenKeywordIsEmptyString() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("", "KRW");
+        when(symbolRepository.searchByKeywordAndCategory("", "KRW"))
+                .thenReturn(Collections.emptyList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return empty list when keyword is blank")
+    void shouldReturnEmptyListWhenKeywordIsBlank() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("   ", "KRW");
+        when(symbolRepository.searchByKeywordAndCategory("   ", "KRW"))
+                .thenReturn(Collections.emptyList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return empty list when category is null")
+    void shouldReturnEmptyListWhenCategoryIsNull() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("Bitcoin", null);
+        when(symbolRepository.searchByKeywordAndCategory("Bitcoin", null))
                 .thenReturn(Collections.emptyList());
 
         //When
