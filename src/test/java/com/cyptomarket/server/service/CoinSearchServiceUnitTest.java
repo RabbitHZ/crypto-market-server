@@ -156,4 +156,76 @@ public class CoinSearchServiceUnitTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    @DisplayName("should throw exception when repository throws exception")
+    void shouldThrowExceptionWhenRepositoryThrowsException() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("Bitcoin", "KRW");
+        when(symbolRepository.searchByKeywordAndCategory("Bitcoin", "KRW"))
+                .thenThrow(new RuntimeException("Database connection error"));
+
+        //When & Then
+        assertThrows(RuntimeException.class, () -> coinSearchService.searchCoins(request));
+    }
+
+    @Test
+    @DisplayName("should return coin list when searching with lowercase keyword")
+    void shouldReturnCoinListWhenSearchingWithLowercaseKeyword() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("bitcoin", "KRW");
+        when(symbolRepository.searchByKeywordAndCategory("bitcoin", "KRW"))
+                .thenReturn(mockSymbols.stream()
+                        .filter(s -> s.getBaseCoin().equalsIgnoreCase("Bitcoin") && s.getQuoteCoin().equals("KRW"))
+                        .toList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Bitcoin", result.get(0).name());
+        assertEquals("BTC/KRW", result.get(0).symbol());
+    }
+
+    @Test
+    @DisplayName("should return coin list when searching with uppercase keyword")
+    void shouldReturnCoinListWhenSearchingWithUppercaseKeyword() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("BITCOIN", "KRW");
+        when(symbolRepository.searchByKeywordAndCategory("BITCOIN", "KRW"))
+                .thenReturn(mockSymbols.stream()
+                        .filter(s -> s.getBaseCoin().equalsIgnoreCase("Bitcoin") && s.getQuoteCoin().equals("KRW"))
+                        .toList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Bitcoin", result.get(0).name());
+        assertEquals("BTC/KRW", result.get(0).symbol());
+    }
+
+    @Test
+    @DisplayName("should return coin list when searching with mixed case keyword")
+    void shouldReturnCoinListWhenSearchingWithMixedCaseKeyword() {
+        //Given
+        CoinSearchRequestV1 request = new CoinSearchRequestV1("BiTcOiN", "KRW");
+        when(symbolRepository.searchByKeywordAndCategory("BiTcOiN", "KRW"))
+                .thenReturn(mockSymbols.stream()
+                        .filter(s -> s.getBaseCoin().equalsIgnoreCase("Bitcoin") && s.getQuoteCoin().equals("KRW"))
+                        .toList());
+
+        //When
+        List<CoinSearchResponseV1> result = coinSearchService.searchCoins(request);
+
+        //Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Bitcoin", result.get(0).name());
+        assertEquals("BTC/KRW", result.get(0).symbol());
+    }
 }
