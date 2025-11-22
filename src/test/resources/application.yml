@@ -1,0 +1,7 @@
+server:
+  servlet:
+    context-path: /v1
+spring:
+  jpa:
+    auditing:
+      enabled: false
